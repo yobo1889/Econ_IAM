@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,6 +11,9 @@
       margin: 0;
       padding: 20px;
       color: #333;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
     }
 
     h1 {
@@ -17,8 +21,30 @@
     }
 
     #data-table {
-      width: 100%;
+      width: 70%;
       border-collapse: collapse;
+      margin-right: 20px;
+    }
+
+    #parameter-inputs {
+      width: 25%;
+      display: flex;
+      flex-direction: column;
+      justify-content: start;
+    }
+
+    #parameter-inputs input {
+      margin-bottom: 10px;
+      padding: 8px;
+    }
+
+    #reconfigure-button {
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 20px;
     }
 
     #data-table th, #data-table td {
@@ -38,20 +64,37 @@
   </style>
 </head>
 <body>
-  <h1>Integrated-Assessment-Model</h1>
-  <table id="data-table">
-    <thead>
-      <tr>
-        <th>Year</th>
-        <th>Range 1</th>
-        <th>Range 2</th>
-        <th>Range 3</th>
-      </tr>
-    </thead>
-    <tbody id="table-body">
-      <!-- Data rows will be inserted here -->
-    </tbody>
-  </table>
+  <div>
+    <h1>Integrated-Assessment-Model</h1>
+    <table id="data-table">
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>CO2 Concentration(PPM)</th>
+          <th>Temperature(*C)</th>
+          <th>Per Capita Consumption(USD)</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <!-- Data rows will be inserted here -->
+      </tbody>
+    </table>
+  </div>
+  <div id="parameter-inputs">
+    <h2>Parameters</h2>
+    <!-- Repeat this input structure for the number of parameters you have -->
+    <input type="text" placeholder="Parameter 1">
+    <input type="text" placeholder="Parameter 2">
+    <input type="text" placeholder="Parameter 3">
+    <input type="text" placeholder="Parameter 4">
+    <input type="text" placeholder="Parameter 5">
+    <input type="text" placeholder="Parameter 6">
+    <input type="text" placeholder="Parameter 7">
+    <input type="text" placeholder="Parameter 8">
+    <input type="text" placeholder="Parameter 9">
+    <input type="text" placeholder="Parameter 10">
+    <button id="reconfigure-button">Reconfigure</button>
+  </div>
 
   <script type="text/javascript">
     const API_KEY = 'AIzaSyCV5ia_3Wy_Ab4IpoB3rb4kSkfdW3_msxQ';
