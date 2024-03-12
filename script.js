@@ -6,17 +6,11 @@ function getValues() {
     const result = response.result;
     const numRows = result.values ? result.values.length : 0;
     console.log(`${numRows} rows retrieved.`);
-
-    // Check if there are values and update the content of the HTML element
-    if (result.values && result.values.length > 0) {
-      let dataContent = result.values.map(row => row.join(', ')).join('<br>');
-      document.getElementById('iam_data').innerHTML = dataContent;
-    } else {
-      document.getElementById('iam_data').textContent = "No data found.";
-    }
+    let dataContent = result.values.map(row => row.join(', ')).join('<br>');
+    document.getElementById('iam_data').innerHTML = dataContent;
   }).catch((err) => {
     console.error("Error fetching data: ", err);
-    document.getElementById('iam_data').textContent = `Error: ${err.message}`;
+    document.getElementById('content').innerText = `Error: ${err.message}`;
   });
 }
 
