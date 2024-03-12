@@ -102,77 +102,67 @@
     const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
     const SPREADSHEET_ID = '1d8zUH-JMpL3NZ4QUswsM9fNKd8h8Pzt7-QNbv3WtUpc';
 
-    function gapiLoaded() {
-      gapi.load('client:auth2', initializeGapiClient);
-    }
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-    async function initializeGapiClient() {
-      try {
-        await gapi.client.init({
-          clientId: CLIENT_ID,
-          scope: SCOPES,
-          discoveryDocs: [DISCOVERY_DOC],
-        });
 
-        gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-        updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-      } catch (error) {
-        console.error("Error initializing the Google API client:", error);
-      }
-    }
+    let tokenClient;
+  let accessToken;
 
-    function updateSigninStatus(isSignedIn) {
-      if (isSignedIn) {
-        listValues();
-      } else {
-        gapi.auth2.getAuthInstance().signIn();
-      }
-    }
+  function gapiLoaded() {
+    gapi.load('client', initializeGapiClient);
+  }
 
-    async function updateDepreciationRate() {
-      if (!gapi.auth2.getAuthInstance().isSignedIn.get()) {
-        console.log('User not signed in.');
-        return;
-      }
+  async function initializeGapiClient() {
+    try {
+      await gapi.client.init({
+        discoveryDocs: [DISCOVERY_DOC],
+      });
 
-      const depreciationRate = document.getElementById('depreciation-rate').value;
-      try {
-        await gapi.client.sheets.spreadsheets.values.update({
-          spreadsheetId: SPREADSHEET_ID,
-          range: 'Parameter!depreciation',
-          valueInputOption: 'USER_ENTERED',
-          resource: {
-            values: [[depreciationRate]]
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: (response) => {
+          if (response.access_token) {
+            accessToken = response.access_token;
+            listValues();
+          } else {
+            console.error('Failed to get the access token.');
           }
-        });
-        console.log('Depreciation rate updated.');
-      } catch (err) {
-        console.error("Error updating depreciation rate:", err);
+        },
+      });
+
+      // Trigger the sign-in flow
+      if (!accessToken) {
+        tokenClient.requestAccessToken();
       }
+    } catch (error) {
+      console.error("Error initializing the Google API client:", error);
     }
-    async function updateDepreciationRate() {
-      const depreciationRate = document.getElementById('depreciation-rate').value;
-      try {
-        // This is a placeholder for the API request to update the value
-        // In a real scenario, you would use gapi.client.sheets.spreadsheets.values.update
-        console.log(`Updating Depreciation Rate to: ${depreciationRate}`);
-        
-        // Example structure for the update request
-        // You need OAuth2 authentication to perform this operation.
-  
-        await gapi.client.sheets.spreadsheets.values.update({
-          spreadsheetId: SPREADSHEET_ID,
-          range: '=Parameter!B5',
-          valueInputOption: 'USER_ENTERED',
-          resource: {
-            values: [[depreciationRate]]
-          }
-        });
-      } catch (err) {
-        console.error("Error updating depreciation rate:", err);
-      }
+  }
+  async function updateDepreciationRate() {
+    if (!accessToken) {
+      console.log('User not signed in.');
+      return;
     }
 
+    const depreciationRate = document.getElementById('depreciation-rate').value;
+    try {
+      await gapi.client.sheets.spreadsheets.values.update({
+        spreadsheetId: SPREADSHEET_ID,
+        range: 'Parameter!depreciation',
+        valueInputOption: 'USER_ENTERED',
+        resource: {
+          values: [[depreciationRate]]
+        },
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+      console.log('Depreciation rate updated.');
+    } catch (err) {
+      console.error("Error updating depreciation rate:", err);
+    }
+  }
     async function listValues() {
       let tableBody = document.getElementById('table-body');
       try {
