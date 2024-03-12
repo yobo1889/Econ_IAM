@@ -1,58 +1,123 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Integrated Assessment Model</title>
-    <meta charset="utf-8" />
-  </head>
-  <body>
-    <p>Integrated Assessment Model</p>
-    <pre id="content" style="white-space: pre-wrap;"></pre>
+<head>
+  <title>Integrated Assessment Model</title>
+  <meta charset="utf-8" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
 
-    <script type="text/javascript">
-      const API_KEY = 'AIzaSyCV5ia_3Wy_Ab4IpoB3rb4kSkfdW3_msxQ';
-      const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
-      const SPREADSHEET_ID = '1d8zUH-JMpL3NZ4QUswsM9fNKd8h8Pzt7-QNbv3WtUpc';
-      const RANGES = ['Output!B2:B282', 'Output!C2:C282', 'Output!D2:D282'];
+    h1 {
+      color: #333;
+    }
 
-      function gapiLoaded() {
-        gapi.load('client', initializeGapiClient);
+    #data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    #data-table th, #data-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+
+    #data-table th {
+      background-color: #f2f2f2;
+      color: #333;
+    }
+
+    #data-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Integrated Assessment Model</h1>
+  <table id="data-table">
+    <thead>
+      <tr>
+        <th>Year</th>
+        <th>Range 1</th>
+        <th>Range 2</th>
+        <th>Range 3</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+      <!-- Data rows will be inserted here -->
+    </tbody>
+  </table>
+
+  <script type="text/javascript">
+    const API_KEY = 'AIzaSyCV5ia_3Wy_Ab4IpoB3rb4kSkfdW3_msxQ';
+    const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
+    const SPREADSHEET_ID = '1d8zUH-JMpL3NZ4QUswsM9fNKd8h8Pzt7-QNbv3WtUpc';
+    const RANGES = ['Output!B2:B282', 'Output!C2:C282', 'Output!D2:D282'];
+
+    function gapiLoaded() {
+      gapi.load('client', initializeGapiClient);
+    }
+
+    async function initializeGapiClient() {
+      try {
+        await gapi.client.init({
+          apiKey: API_KEY,
+          discoveryDocs: [DISCOVERY_DOC],
+        });
+        listValues();
+      } catch (error) {
+        console.error("Error initializing the Google API client:", error);
       }
+    }
 
-      async function initializeGapiClient() {
-        try {
-          await gapi.client.init({
-            apiKey: API_KEY,
-            discoveryDocs: [DISCOVERY_DOC],
+    async function listValues() {
+      let tableBody = document.getElementById('table-body');
+      try {
+        let dataRows = [];
+        for (let i = 0; i < 281; i++) { // Adjust 281 to match the number of years or rows
+          dataRows.push([2020 + i]); // Initialize rows with the year
+        }
+
+        for (let range of RANGES) {
+          let response = await gapi.client.sheets.spreadsheets.values.get({
+            spreadsheetId: SPREADSHEET_ID,
+            range: range,
           });
-          listValues();
-        } catch (error) {
-          console.error("Error initializing the Google API client:", error);
-          document.getElementById('content').innerText = 'Error loading data.';
-        }
-      }
-
-      async function listValues() {
-        let combinedData = [];
-        try {
-          for (let range of RANGES) {
-            let response = await gapi.client.sheets.spreadsheets.values.get({
-              spreadsheetId: SPREADSHEET_ID,
-              range: range,
-            });
-            let values = response.result.values;
-            if (!values || values.length === 0) {
-              console.log('No values found for range:', range);
-              continue;
-            }
-            combinedData.push(values.map(row => row[0]).join('\n'));
+          let values = response.result.values;
+          if (!values || values.length === 0) {
+            console.log('No values found for range:', range);
+            continue;
           }
-          document.getElementById('content').innerText = combinedData.join('\n');
-        } catch (err) {
-          console.error("Error fetching data:", err);
-          document.getElementById('content').innerText = 'Error fetching data.';
+
+          // Fill the dataRows with values from the sheet
+          values.forEach((value, index) => {
+            if (dataRows[index]) {
+              dataRows[index].push(value[0] || '');
+            }
+          });
         }
+
+        // Generate the table rows
+        dataRows.forEach(row => {
+          let tr = document.createElement('tr');
+          row.forEach(cell => {
+            let td = document.createElement('td');
+            td.textContent = cell;
+            tr.appendChild(td);
+          });
+          tableBody.appendChild(tr);
+        });
+
+      } catch (err) {
+        console.error("Error fetching data:", err);
       }
-    </script>
-    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-  </body>
+    }
+  </script>
+  <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+</body>
 </html>
