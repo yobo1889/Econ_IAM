@@ -1,64 +1,56 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Sheets API Quickstart</title>
+    <title>Integrated Assessment Model</title>
     <meta charset="utf-8" />
   </head>
   <body>
-    <p>Sheets API Quickstart</p>
+    <p>Integrated Assessment Model</p>
     <pre id="content" style="white-space: pre-wrap;"></pre>
 
     <script type="text/javascript">
-      // TODO(developer): Set to your API key from the Developer Console
       const API_KEY = 'AIzaSyCV5ia_3Wy_Ab4IpoB3rb4kSkfdW3_msxQ';
-
-      // Discovery doc URL for APIs used by the quickstart
       const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
+      const SPREADSHEET_ID = '1d8zUH-JMpL3NZ4QUswsM9fNKd8h8Pzt7-QNbv3WtUpc';
+      const RANGES = ['Output!B2:B282', 'Output!C2:C282', 'Output!D2:D282'];
 
-      /**
-       * Callback after api.js is loaded.
-       */
       function gapiLoaded() {
         gapi.load('client', initializeGapiClient);
       }
 
-      /**
-       * Callback after the API client is loaded. Loads the
-       * discovery doc to initialize the API.
-       */
       async function initializeGapiClient() {
-        await gapi.client.init({
-          apiKey: API_KEY,
-          discoveryDocs: [DISCOVERY_DOC],
-        });
-        listMajors();
+        try {
+          await gapi.client.init({
+            apiKey: API_KEY,
+            discoveryDocs: [DISCOVERY_DOC],
+          });
+          listValues();
+        } catch (error) {
+          console.error("Error initializing the Google API client:", error);
+          document.getElementById('content').innerText = 'Error loading data.';
+        }
       }
 
-      /**
-       * Print the names and majors of students in a sample spreadsheet:
-       * https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
-       */
-      async function listMajors() {
-        let response;
+      async function listValues() {
+        let combinedData = [];
         try {
-          response = await gapi.client.sheets.spreadsheets.values.get({
-            spreadsheetId: '1d8zUH-JMpL3NZ4QUswsM9fNKd8h8Pzt7-QNbv3WtUpc',
-            range: 'Economic Module!B66:B200',
-          });
+          for (let range of RANGES) {
+            let response = await gapi.client.sheets.spreadsheets.values.get({
+              spreadsheetId: SPREADSHEET_ID,
+              range: range,
+            });
+            let values = response.result.values;
+            if (!values || values.length === 0) {
+              console.log('No values found for range:', range);
+              continue;
+            }
+            combinedData.push(values.map(row => row[0]).join('\n'));
+          }
+          document.getElementById('content').innerText = combinedData.join('\n');
         } catch (err) {
-          document.getElementById('content').innerText = err.message;
-          return;
+          console.error("Error fetching data:", err);
+          document.getElementById('content').innerText = 'Error fetching data.';
         }
-        const range = response.result;
-        if (!range || !range.values || range.values.length == 0) {
-          document.getElementById('content').innerText = 'No values found.';
-          return;
-        }
-        // Flatten to string to display
-        const output = range.values.reduce(
-            (str, row) => `${str}${row.join(", ")}\n`,
-            '');
-        document.getElementById('content').innerText = output;
       }
     </script>
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
