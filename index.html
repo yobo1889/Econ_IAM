@@ -94,6 +94,9 @@
     <input type="text" placeholder="Parameter 9">
     <input type="text" placeholder="Parameter 10">
     <button id="reconfigure-button" onclick="updateDepreciationRate()">Reconfigure</button>
+    <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
+    <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
+
   </div>
 
   <script type="text/javascript">
@@ -102,6 +105,7 @@
     const SPREADSHEET_ID = '1d8zUH-JMpL3NZ4QUswsM9fNKd8h8Pzt7-QNbv3WtUpc';
     const RANGES = ['Output!B2:B282', 'Output!C2:C282', 'Output!D2:D282'];
     const CLIENT_ID = '226866111695-b1jbpbp06sqhp7uouge84g84l8fmr817.apps.googleusercontent.com';
+    let tokenClient;
 
 
     function gapiLoaded() {
@@ -119,6 +123,16 @@
         console.error("Error initializing the Google API client:", error);
       }
     }
+    function gisLoaded() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: '', // defined later
+        });
+        gisInited = true;
+        maybeEnableButtons();
+    }
+
     async function updateDepreciationRate() {
       const depreciationRate = document.getElementById('depreciation-rate').value;
       try {
@@ -141,6 +155,39 @@
         console.error("Error updating depreciation rate:", err);
       }
     }
+    function handleAuthClick() {
+        tokenClient.callback = async (resp) => {
+          if (resp.error !== undefined) {
+            throw (resp);
+          }
+          document.getElementById('signout_button').style.visibility = 'visible';
+          document.getElementById('authorize_button').innerText = 'Refresh';
+        };
+
+        if (gapi.client.getToken() === null) {
+          // Prompt the user to select a Google Account and ask for consent to share their data
+          // when establishing a new session.
+          tokenClient.requestAccessToken({prompt: 'consent'});
+        } else {
+          // Skip display of account chooser and consent dialog for an existing session.
+          tokenClient.requestAccessToken({prompt: ''});
+        }
+      }
+
+      /**
+       *  Sign out the user upon button click.
+       */
+      function handleSignoutClick() {
+        const token = gapi.client.getToken();
+        if (token !== null) {
+          google.accounts.oauth2.revoke(token.access_token);
+          gapi.client.setToken('');
+          document.getElementById('content').innerText = '';
+          document.getElementById('authorize_button').innerText = 'Authorize';
+          document.getElementById('signout_button').style.visibility = 'hidden';
+        }
+      }
+
 
     async function listValues() {
       let tableBody = document.getElementById('table-body');
@@ -186,5 +233,6 @@
     }
   </script>
   <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+  <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
 </html>
