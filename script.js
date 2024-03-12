@@ -29,5 +29,5 @@ function execute() {
 }
 
 gapi.load("client:auth2", function() {
-  gapi.auth2.init({client_id: "YOUR_CLIENT_ID"});
+  gapi.auth2.init({client_id: "226866111695-b1jbpbp06sqhp7uouge84g84l8fmr817.apps.googleusercontent.com"});
 });
