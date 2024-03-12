@@ -102,21 +102,47 @@
     const SPREADSHEET_ID = '1d8zUH-JMpL3NZ4QUswsM9fNKd8h8Pzt7-QNbv3WtUpc';
     const RANGES = ['Output!B2:B282', 'Output!C2:C282', 'Output!D2:D282'];
 
-    function gapiLoaded() {
-      gapi.load('client', initializeGapiClient);
-    }
+    const CLIENT_ID = '226866111695-b1jbpbp06sqhp7uouge84g84l8fmr817.apps.googleusercontent.com';
 
-    async function initializeGapiClient() {
-      try {
+    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+
+      let tokenClient;
+      let gapiInited = false;
+      let gisInited = false;
+
+      /**
+       * Callback after api.js is loaded.
+       */
+      function gapiLoaded() {
+        gapi.load('client', initializeGapiClient);
+      }
+
+      /**
+       * Callback after the API client is loaded. Loads the
+       * discovery doc to initialize the API.
+       */
+      async function initializeGapiClient() {
         await gapi.client.init({
           apiKey: API_KEY,
           discoveryDocs: [DISCOVERY_DOC],
         });
-        listValues();
-      } catch (error) {
-        console.error("Error initializing the Google API client:", error);
+        gapiInited = true;
+        maybeEnableButtons();
       }
-    }
+
+      /**
+       * Callback after Google Identity Services are loaded.
+       */
+      function gisLoaded() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: '', // defined later
+        });
+        gisInited = true;
+        maybeEnableButtons();
+      }
+
     async function updateDepreciationRate() {
       const depreciationRate = document.getElementById('depreciation-rate').value;
       try {
@@ -184,5 +210,6 @@
     }
   </script>
   <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+  <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
 </html>
