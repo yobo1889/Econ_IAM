@@ -107,8 +107,6 @@
     const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
       let tokenClient;
-      let gapiInited = false;
-      let gisInited = false;
 
       /**
        * Callback after api.js is loaded.
@@ -126,8 +124,6 @@
           apiKey: API_KEY,
           discoveryDocs: [DISCOVERY_DOC],
         });
-        gapiInited = true;
-        maybeEnableButtons();
       }
 
       /**
@@ -139,8 +135,6 @@
           scope: SCOPES,
           callback: '', // defined later
         });
-        gisInited = true;
-        maybeEnableButtons();
       }
 
     async function updateDepreciationRate() {
