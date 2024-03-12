@@ -3,7 +3,7 @@ function initClient() {
   gapi.client.init({
     'apiKey': 'AIzaSyCV5ia_3Wy_Ab4IpoB3rb4kSkfdW3_msxQ', // Replace with your API key
     'discoveryDocs': ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-    // 'clientId': 'YOUR_CLIENT_ID', // Uncomment if using OAuth
+    'clientId': '226866111695-b1jbpbp06sqhp7uouge84g84l8fmr817.apps.googleusercontent.com', // Uncomment if using OAuth
     // 'scope': 'https://www.googleapis.com/auth/spreadsheets.readonly', // Uncomment if using OAuth
   }).then(function () {
     getValues("1d8zUH-JMpL3NZ4QUswsM9fNKd8h8Pzt7-QNbv3WtUpc", "Economic Module!B66:B200");
