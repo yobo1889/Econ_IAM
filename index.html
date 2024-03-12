@@ -83,7 +83,7 @@
   <div id="parameter-inputs">
     <h2>Parameters</h2>
     <!-- Repeat this input structure for the number of parameters you have -->
-    <input type="text" placeholder="Parameter 1">
+    <input type="text" id="depreciation-rate" placeholder="Depreciation Rate">
     <input type="text" placeholder="Parameter 2">
     <input type="text" placeholder="Parameter 3">
     <input type="text" placeholder="Parameter 4">
@@ -93,7 +93,7 @@
     <input type="text" placeholder="Parameter 8">
     <input type="text" placeholder="Parameter 9">
     <input type="text" placeholder="Parameter 10">
-    <button id="reconfigure-button">Reconfigure</button>
+    <button id="reconfigure-button" onclick="updateDepreciationRate()">Reconfigure</button>
   </div>
 
   <script type="text/javascript">
@@ -115,6 +115,28 @@
         listValues();
       } catch (error) {
         console.error("Error initializing the Google API client:", error);
+      }
+    }
+    async function updateDepreciationRate() {
+      const depreciationRate = document.getElementById('depreciation-rate').value;
+      try {
+        // This is a placeholder for the API request to update the value
+        // In a real scenario, you would use gapi.client.sheets.spreadsheets.values.update
+        console.log(`Updating Depreciation Rate to: ${depreciationRate}`);
+        
+        // Example structure for the update request
+        // You need OAuth2 authentication to perform this operation.
+  
+        await gapi.client.sheets.spreadsheets.values.update({
+          spreadsheetId: SPREADSHEET_ID,
+          range: 'Parameter!depreciation',
+          valueInputOption: 'USER_ENTERED',
+          resource: {
+            values: [[depreciationRate]]
+          }
+        });
+      } catch (err) {
+        console.error("Error updating depreciation rate:", err);
       }
     }
 
