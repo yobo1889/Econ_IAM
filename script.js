@@ -13,8 +13,8 @@ function loadClient() {
 
 function execute() {
   return gapi.client.sheets.spreadsheets.values.get({
-    "spreadsheetId": "your-spreadsheet-id",
-    "range": "Sheet1!A1:D5",
+    "spreadsheetId": "1d8zUH-JMpL3NZ4QUswsM9fNKd8h8Pzt7-QNbv3WtUpc",
+    "range": "Economic Module!B66:B200",
   })
   .then(response => {
     const range = response.result;
