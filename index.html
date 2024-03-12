@@ -95,51 +95,73 @@
     <input type="text" placeholder="Parameter 10">
     <button id="reconfigure-button" onclick="updateDepreciationRate()">Reconfigure</button>
   </div>
-
   <script type="text/javascript">
-    const API_KEY = 'AIzaSyCV5ia_3Wy_Ab4IpoB3rb4kSkfdW3_msxQ';
+    const CLIENT_ID = '226866111695-b1jbpbp06sqhp7uouge84g84l8fmr817.apps.googleusercontent.com';
     const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
+    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
     const SPREADSHEET_ID = '1d8zUH-JMpL3NZ4QUswsM9fNKd8h8Pzt7-QNbv3WtUpc';
-    const RANGES = ['Output!B2:B282', 'Output!C2:C282', 'Output!D2:D282'];
+
+    let tokenClient;
+    let gapiInited = false;
 
     function gapiLoaded() {
-      gapi.load('client', initializeGapiClient);
+      gapi.load('client', () => {
+        initializeGapiClient();
+      });
     }
 
     async function initializeGapiClient() {
       try {
         await gapi.client.init({
-          apiKey: API_KEY,
           discoveryDocs: [DISCOVERY_DOC],
         });
-        listValues();
+        gapiInited = true;
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID,
+            scope: SCOPES,
+            callback: (response) => {
+              if (response.error !== undefined) {
+                throw response;
+              }
+              gapi.client.setToken(response.access_token);
+              document.getElementById('authorize_button').style.visibility = 'hidden';
+              document.getElementById('signout_button').style.visibility = 'visible';
+              listValues();
+            },
+        });
       } catch (error) {
         console.error("Error initializing the Google API client:", error);
       }
     }
+
+    function handleAuthClick() {
+      tokenClient.requestAccessToken({prompt: 'consent'});
+    }
+
+    function handleSignoutClick() {
+      google.accounts.oauth2.revoke(gapi.client.getToken().access_token);
+      gapi.client.setToken('');
+      document.getElementById('content').innerText = '';
+      document.getElementById('authorize_button').style.visibility = 'visible';
+      document.getElementById('signout_button').style.visibility = 'hidden';
+    }
+
     async function updateDepreciationRate() {
       const depreciationRate = document.getElementById('depreciation-rate').value;
       try {
-        // This is a placeholder for the API request to update the value
-        // In a real scenario, you would use gapi.client.sheets.spreadsheets.values.update
-        console.log(`Updating Depreciation Rate to: ${depreciationRate}`);
-        
-        // Example structure for the update request
-        // You need OAuth2 authentication to perform this operation.
-  
         await gapi.client.sheets.spreadsheets.values.update({
           spreadsheetId: SPREADSHEET_ID,
-          range: '=Parameter!B5',
+          range: 'Parameter!B5',
           valueInputOption: 'USER_ENTERED',
           resource: {
             values: [[depreciationRate]]
           }
         });
+        console.log('Depreciation rate updated.');
       } catch (err) {
         console.error("Error updating depreciation rate:", err);
       }
     }
-
     async function listValues() {
       let tableBody = document.getElementById('table-body');
       try {
@@ -184,5 +206,6 @@
     }
   </script>
   <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+  <script async defer src="https://accounts.google.com/gsi/client"></script>
 </body>
 </html>
